@@ -136,3 +136,4 @@ dependencies:
       - pluggy==1.4.0
       - pytest==8.1.1
       - timeout-decorator==0.5.0
+prefix: /home/iamthanh/miniconda3/envs/intro_to_ai

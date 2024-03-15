@@ -78,7 +78,7 @@ class AStar(GraphSearch):
         self.frontier = []
         AStar.heuristic_f = heuristic_f
 
-    # @timeout_decorator.timeout(5)
+    @timeout_decorator.timeout(1000)
     def search(self, src: Node, dsts: list[Node]):
         """
         @Return: (actions, cost)
@@ -92,7 +92,6 @@ class AStar(GraphSearch):
         while len(self.frontier) != 0:
             curr = heapq.heappop(self.frontier)
             expanded.append(curr)
-            # print(f"Expanded state: \n{curr}")
             if curr in dsts:
                 path = GraphSearch.reconstruct(curr)
                 return [node.action for node in path if node.action], sum([node.cost for node in path if node.cost])
@@ -120,19 +119,8 @@ class AStar(GraphSearch):
         def __lt__(self, other):
             return self.f < other.f
 
-        @staticmethod
-        def set_heuristic_f(function):
-            def wrapper(self):
-                result = function(self)
-                if isinstance(result, Node):
-                    result = [Node]
-                if isinstance(result, list):
-                    result = [AStar.Node(node.state, node.action, node.parent, node.cost) for node in result]
-                    for node in result:
-                        node.h = AStar.heuristic_f(node.state)
-                return result
-            return wrapper
-
-        @set_heuristic_f
         def get_successors(self):
-            return super().get_successors()
+            result = [AStar.Node(node.state, node.action, node.parent, node.cost) for node in super().get_successors()]
+            for node in result:
+                node.h = AStar.heuristic_f(node.state)
+            return result
