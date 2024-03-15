@@ -1,6 +1,5 @@
 import itertools
 import logging
-import os
 import random
 
 from node import Node
@@ -12,12 +11,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class Testcases:
-    __test_cases = []
-    THRESHOLD = 1000
 
     def __init__(self, threshold: int):
-        Testcases.THRESHOLD = threshold
-        Testcases.generate_random_seq()
+        self.THRESHOLD = threshold
+        self.__test_cases = []
 
     @staticmethod
     def heuristic_f(current_state: list[list[int]]):
@@ -35,29 +32,31 @@ class Testcases:
             cell_score["goal2"].append(hs[1])
         return min(sum(cell_score['goal1']), sum(cell_score['goal2']))
 
-    @staticmethod
-    def generate_random_seq():
+    def generate_random_seq(self, only_valid_case=False):
         # generate 1000 random sequence of number
-        while len(Testcases.__test_cases) < Testcases.THRESHOLD:
+        while len(self.__test_cases) < self.THRESHOLD:
             digits = list(range(9))
             random.shuffle(digits)
-            if digits not in Testcases.__test_cases:
+            if digits not in self.__test_cases:
                 testcase = [list(row) for row in itertools.batched(digits, n=3)]
-                Testcases.__test_cases.append(testcase)
+                if only_valid_case and not EightPuzzle.checkSolvability(testcase):
+                    continue
+                yield testcase
+                self.__test_cases.append(testcase)
 
     def test_astar(self):
         searcher = search.AStar(Testcases.heuristic_f)
-        for i, testcase in enumerate(Testcases.__test_cases):
+        counter = 0
+        for testcase in self.generate_random_seq():
             try:
-                testcase = [[4, 5, 7], [3, 1, 2], [6, 0, 8]]
                 actions, overall_cost = EightPuzzle(testcase, searcher).execute()
                 if overall_cost > 0:
-                    logging.debug(f"TC-{i}: {testcase}")
-                    logging.debug(f"Solution {i}:\n{actions}")
-                    # GraphSearch.show(Node(testcase), actions, f"TC-{i}")
-                    break
+                    logging.debug(f"TC-{counter}: {testcase}")
+                    logging.debug(f"Solution {counter}:\n{actions}")
+                    GraphSearch.show(Node(testcase), actions, f"TC-{counter}")
                 else:
-                    logging.info(f"TC-{i} is unsolvable")
+                    logging.info(f"TC-{counter} is unsolvable")
                     logging.info(testcase)
+                counter += 1
             except:
-                logging.error(f"Long running testcase TC-{i}:\n{testcase}")
+                logging.error(f"Long running testcase TC-{counter}:\n{testcase}")

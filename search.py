@@ -31,12 +31,12 @@ class GraphSearch(ABC):
     @staticmethod
     def show(initial: Node, actions: list[str], filename=None):
         dot = Digraph()
-        curr = deepcopy(initial)
+        curr = initial
         curr.draw(dot)
         for action in actions:
-            tmp = initial.get_successor(action, curr.state)
+            tmp = curr.get_successor(action, deepcopy(curr.state))
             if tmp is None: break
-            curr = Node(tmp, parent=curr, action=action)
+            curr = Node(state=tmp, parent=curr, action=action)
             curr.draw(dot)
         dot.render(filename=filename, directory="solutions", cleanup=True)
 
