@@ -80,21 +80,23 @@ class AStar(GraphSearch):
         """
         src = AStar.Node(state=src.state, cost=0)
         dsts = [self.Node(state=goal.state) for goal in dsts]
-        expanded = []
+        expanded = set()
         self.frontier = [src]
         while len(self.frontier) != 0:
             curr = heapq.heappop(self.frontier)
-            expanded.append(curr)
+            expanded.add(curr)
             if curr in dsts:
                 path = GraphSearch.reconstruct(curr)
                 return [node.action for node in path if node.action], curr.cost
             for succ in curr.get_successors():
-                if succ not in self.frontier and succ not in expanded:
+                if succ not in expanded and succ not in self.frontier:
                     heapq.heappush(self.frontier, succ)
                 elif succ in self.frontier:
-                    node = [node for node in self.frontier if node.state == succ.state][0]
-                    if succ.f < node.f:
-                        node.cost = succ.cost
+                    # node = [node for node in self.frontier if node.state == succ.state][0]
+                    idx = self.frontier.index(succ)
+                    if succ.f < self.frontier[idx].f:
+                        self.frontier[idx] = succ
+                        heapq.heapify(self.frontier)
         return [], -1
 
     class Node(Node):

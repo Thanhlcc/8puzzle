@@ -2,8 +2,7 @@ from tests import Testcases
 
 
 if __name__ == "__main__":
-    test_manager = Testcases(10)
-    # result1 = test_manager.test_astar()
-    result2 = test_manager.test_bfs()
-    # print(result1)
-    print(result2)
+    test_manager = Testcases(1000)
+    results = test_manager.run_concurrently()
+    print(results["astar"])
+    print(results["bfs"])
