@@ -2,6 +2,8 @@ import itertools
 import logging
 import random
 
+import asyncio
+
 from node import Node
 from search import GraphSearch
 import search
@@ -15,6 +17,7 @@ class Testcases:
     def __init__(self, threshold: int):
         self.THRESHOLD = threshold
         self.__test_cases = []
+        self.generate_random_seq(True)
 
     @staticmethod
     def heuristic_f(current_state: list[list[int]]):
@@ -38,25 +41,42 @@ class Testcases:
             digits = list(range(9))
             random.shuffle(digits)
             if digits not in self.__test_cases:
-                testcase = [list(row) for row in itertools.batched(digits, n=3)]
+                testcase = [list(digits[i:i + 3]) for i in range(0, 9, 3)]
                 if only_valid_case and not EightPuzzle.checkSolvability(testcase):
                     continue
-                yield testcase
                 self.__test_cases.append(testcase)
 
-    def test_astar(self):
+    async def test_astar(self):
         searcher = search.AStar(Testcases.heuristic_f)
         counter = 0
-        for testcase in self.generate_random_seq():
-            try:
-                actions, overall_cost = EightPuzzle(testcase, searcher).execute()
-                if overall_cost > 0:
-                    logging.debug(f"TC-{counter}: {testcase}")
-                    logging.debug(f"Solution {counter}:\n{actions}")
-                    GraphSearch.show(Node(testcase), actions, f"TC-{counter}")
-                else:
-                    logging.info(f"TC-{counter} is unsolvable")
-                    logging.info(testcase)
-                counter += 1
-            except:
-                logging.error(f"Long running testcase TC-{counter}:\n{testcase}")
+        result = dict()
+        for testcase in self.__test_cases:
+            actions, overall_cost = EightPuzzle(testcase, searcher).execute()
+            if overall_cost > 0:
+                logging.debug(f"TC-{counter}: {testcase}")
+                logging.debug(f"Solution {counter}:\n{actions}")
+                GraphSearch.show(Node(testcase), actions, "solutions/astar", f"TC-{counter}")
+            else:
+                logging.info(f"TC-{counter} is unsolvable")
+                logging.info(testcase)
+            result[counter] = overall_cost
+            counter += 1
+        return result
+
+    async def test_bfs(self):
+        counter = 0
+        result = dict()
+        for testcase in self.__test_cases:
+            # testcase= [[1, 8, 2], [0, 4, 3], [7, 6, 5]]
+            actions, overall_cost = EightPuzzle(testcase, search.BFS()).execute()
+            if overall_cost > 0:
+                logging.debug(f"TC-{counter}: {testcase}")
+                logging.debug(f"Solution {counter}:\n{actions}")
+                GraphSearch.show(Node(testcase), actions, "solutions/bfs", f"TC-{counter}")
+            else:
+                logging.info(f"TC-{counter} is unsolvable")
+                logging.info(testcase)
+            result[counter] = overall_cost
+            counter += 1
+            # break
+        return result

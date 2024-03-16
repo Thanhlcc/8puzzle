@@ -29,7 +29,7 @@ class GraphSearch(ABC):
         return path[::-1]
 
     @staticmethod
-    def show(initial: Node, actions: list[str], filename=None):
+    def show(initial: Node, actions: list[str], directory="solutions", filename=None):
         dot = Digraph()
         curr = initial
         curr.draw(dot)
@@ -38,37 +38,30 @@ class GraphSearch(ABC):
             if tmp is None: break
             curr = Node(state=tmp, parent=curr, action=action)
             curr.draw(dot)
-        dot.render(filename=filename, directory="solutions", cleanup=True)
+        dot.render(filename=filename, directory=directory, cleanup=True)
 
 
 class BFS(GraphSearch):
     def search(self, src: Node, dsts: list[Node]):
-        explored = []
-        frontier = list()
-
-        frontier.append((src, []))
+        explored = list()
+        frontier = [src]
 
         while True:
             if len(frontier) == 0:
-                return []
+                return [], -1
 
-            (current, actions) = frontier.pop(0)
+            current = frontier.pop(0)
+            # explored.add(current.get_id())
             explored.append(current.get_id())
-
             for successor in current.get_successors():
-                if self.check_successor(successor, explored, frontier):
-                    if self.goal_test(successor, dsts): return actions + [successor.get_action()]
-                    frontier.append((successor, actions + [successor.get_action()]))
+                if successor.get_id() not in explored and successor not in frontier:
+                    if successor in dsts:
+                        path = GraphSearch.reconstruct(successor)
+                        return [node.action for node in path if node.action], len(path) - 1
+                    frontier.append(successor)
 
     def goal_test(self, node: Node, dsts: list[Node]):
         return node.get_id() in [dst.get_id() for dst in dsts]
-
-    def check_successor(self, successor: Node, explored: list, frontier: list):
-        in_frontier = False
-        for (node, _) in frontier:
-            if successor.get_id() == node.get_id():
-                in_frontier = True
-        return (not in_frontier) or (successor.get_id() not in explored)
 
 
 class AStar(GraphSearch):
@@ -78,7 +71,7 @@ class AStar(GraphSearch):
         self.frontier = []
         AStar.heuristic_f = heuristic_f
 
-    @timeout_decorator.timeout(1000)
+    # @timeout_decorator.timeout(10)
     def search(self, src: Node, dsts: list[Node]):
         """
         @Return: (actions, cost)
@@ -88,21 +81,20 @@ class AStar(GraphSearch):
         src = AStar.Node(state=src.state, cost=0)
         dsts = [self.Node(state=goal.state) for goal in dsts]
         expanded = []
-        self.frontier.append(src)
+        self.frontier = [src]
         while len(self.frontier) != 0:
             curr = heapq.heappop(self.frontier)
             expanded.append(curr)
             if curr in dsts:
                 path = GraphSearch.reconstruct(curr)
-                return [node.action for node in path if node.action], sum([node.cost for node in path if node.cost])
+                return [node.action for node in path if node.action], curr.cost
             for succ in curr.get_successors():
                 if succ not in self.frontier and succ not in expanded:
-                    # Prepend into frontier to apply LIFO tie-breaking strategy
                     heapq.heappush(self.frontier, succ)
                 elif succ in self.frontier:
                     node = [node for node in self.frontier if node.state == succ.state][0]
                     if succ.f < node.f:
-                        node = succ
+                        node.cost = succ.cost
         return [], -1
 
     class Node(Node):

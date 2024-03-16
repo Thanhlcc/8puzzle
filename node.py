@@ -18,7 +18,7 @@ class Node:
         return '\n'.join(list(map(lambda x: refine_one_row(x), self.state)))
 
     def __eq__(self, other):
-        return self.state == other.state
+        return self.id == other.id
 
     def __hash__(self):
         return hash(self.id)
