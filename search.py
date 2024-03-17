@@ -71,7 +71,6 @@ class AStar(GraphSearch):
         self.frontier = []
         AStar.heuristic_f = heuristic_f
 
-    # @timeout_decorator.timeout(10)
     def search(self, src: Node, dsts: list[Node]):
         """
         @Return: (actions, cost)
@@ -80,24 +79,26 @@ class AStar(GraphSearch):
         """
         src = AStar.Node(state=src.state, cost=0)
         dsts = [self.Node(state=goal.state) for goal in dsts]
-        expanded = set()
+        expanded : dict[str, Node]= {}
         self.frontier = [src]
         while len(self.frontier) != 0:
             curr = heapq.heappop(self.frontier)
-            expanded.add(curr)
+            expanded[curr.id] = curr
+            print(len(expanded))
             if curr in dsts:
                 path = GraphSearch.reconstruct(curr)
-                return [node.action for node in path if node.action], curr.cost
+                return [node.action for node in path if node.action], curr.cost, len(expanded)
             for succ in curr.get_successors():
-                if succ not in expanded and succ not in self.frontier:
+                if succ not in self.frontier and succ.id not in expanded:
                     heapq.heappush(self.frontier, succ)
                 elif succ in self.frontier:
-                    # node = [node for node in self.frontier if node.state == succ.state][0]
                     idx = self.frontier.index(succ)
-                    if succ.f < self.frontier[idx].f:
+                    if succ.cost < self.frontier[idx].cost:
                         self.frontier[idx] = succ
                         heapq.heapify(self.frontier)
-        return [], -1
+                elif succ.id in expanded and succ.cost < expanded[succ.id].cost:
+                        expanded[curr.id] = succ
+        return [], -1, len(expanded)
 
     class Node(Node):
         # shortcut for accessing the evaluation value
@@ -114,7 +115,6 @@ class AStar(GraphSearch):
             return self.f < other.f
 
         def get_successors(self):
-            result = [AStar.Node(node.state, node.action, node.parent, node.cost) for node in super().get_successors()]
-            for node in result:
-                node.h = AStar.heuristic_f(node.state)
-            return result
+            for node in super().get_successors():
+                yield AStar.Node(node.state, node.action, node.parent, node.cost, AStar.heuristic_f)
+
