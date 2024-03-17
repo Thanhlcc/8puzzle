@@ -10,7 +10,7 @@ def start_test_case():
     print(results["bfs"])
 
 
-if __name__ == "__main__":
+def cmd_interface():
     raw_input = input("Enter initial state")
     plat_array = [int(x) for x in raw_input.split(' ')]
     matrix = [list(plat_array[i:i + 3]) for i in range(0, 9, 3)]
@@ -23,3 +23,8 @@ if __name__ == "__main__":
     game.execute()
     game.show()
 
+
+if __name__ == "__main__":
+    test_manager = Testcases(1000)
+    results = test_manager.test_astar()
+    print(results)

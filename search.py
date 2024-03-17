@@ -84,7 +84,7 @@ class AStar(GraphSearch):
         while len(self.frontier) != 0:
             curr = heapq.heappop(self.frontier)
             expanded[curr.id] = curr
-            print(len(expanded))
+            # print(len(expanded))
             if curr in dsts:
                 path = GraphSearch.reconstruct(curr)
                 return [node.action for node in path if node.action], curr.cost, len(expanded)

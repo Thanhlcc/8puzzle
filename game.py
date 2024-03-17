@@ -20,9 +20,8 @@ class EightPuzzle():
         self.actions = []
 
     def execute(self) -> tuple:
-        # if EightPuzzle.checkSolvability(self.initial):
-        if True:
-            self.actions, self.cost = self.searcher.search(
+        if EightPuzzle.checkSolvability(self.initial):
+            self.actions, self.cost, no_expanded = self.searcher.search(
                 src=Node(self.initial),
                 dsts=[Node(goal) for goal in EightPuzzle.goals]
             )

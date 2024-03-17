@@ -44,23 +44,23 @@ class Testcases:
                     continue
                 self.__test_cases.append(testcase)
 
-    # def test_astar(self):
-    #     searcher = search.AStar(Testcases.heuristic_f)
-    #     counter = 0
-    #     result = dict()
-    #     for testcase in self.__test_cases:
-    #         actions, overall_cost = EightPuzzle(testcase, searcher).execute()
-    #         if overall_cost > 0:
-    #             logging.debug(f"TC-{counter}: {testcase}")
-    #             logging.debug(f"Solution {counter}:\n{actions}")
-    #             GraphSearch.show(Node(testcase), actions, "solutions/astar", f"TC-{counter}")
-    #         else:
-    #             logging.info(f"TC-{counter} is unsolvable")
-    #             logging.info(testcase)
-    #         result[counter] = overall_cost
-    #         counter += 1
-    #     return result
-    #
+    def test_astar(self):
+        searcher = search.AStar(Testcases.heuristic_f)
+        counter = 0
+        result = dict()
+        for testcase in self.__test_cases:
+            actions, overall_cost = EightPuzzle(testcase, searcher).execute()
+            if overall_cost > 0:
+                logging.debug(f"TC-{counter}: {testcase}")
+                logging.debug(f"Solution {counter}:\n{actions}")
+                GraphSearch.show(Node(testcase), actions, "solutions/astar", f"TC-{counter}")
+            else:
+                logging.info(f"TC-{counter} is unsolvable")
+                logging.info(testcase)
+            result[counter] = overall_cost
+            counter += 1
+        return result
+
     # def test_bfs(self):
     #     counter = 0
     #     result = dict()

@@ -65,7 +65,7 @@ class Node:
         return pi, pj
 
     def get_blank_pos(self, state):
-        return [(i, j) for i, val_i in enumerate(self.state) for j, val_j in enumerate(val_i) if val_j == 0][0]
+        return tuple(Node.index(self.state, 0).values())
 
     @staticmethod
     def index(matrix_2, cell) -> dict[str, int | Any] | dict[Any, Any]:
